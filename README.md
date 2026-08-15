@@ -1,6 +1,10 @@
 # 电子科技大学清水河校区 · Minecraft 还原
 
-用 [arnis](https://github.com/louis-e/arnis) 从 OpenStreetMap 数据 1:1 还原的电子科技大学清水河校区 Minecraft 世界，配套 [BlueMap](https://bluemap.bluecolored.de/) 网页 3D 地图（免装 Minecraft 即可在浏览器里逛校园），122 处建筑带中文名字标注。
+用 [arnis](https://github.com/louis-e/arnis) 从 OpenStreetMap 数据 1:1 还原的电子科技大学清水河校区 Minecraft 世界，配套 [BlueMap](https://bluemap.bluecolored.de/) 网页 3D 地图（免装 Minecraft 即可在浏览器里逛校园），123 处建筑带中文名字标注。
+
+**在线游玩（无需安装任何东西）：https://yaowenhu-pm.github.io/uestc-minecraft/**
+
+点击左下角"小人模式"，用虚拟摇杆操控一个 MC 小人在校园里第三人称行走（摇杆前后移动、左右转向），右下角"上/下"按钮起飞降落，落地自动贴合地形与楼顶。手机也能玩。
 
 ![校区俯视图](assets/map-overview.png)
 
@@ -11,7 +15,7 @@
 | 目录 | 说明 |
 |---|---|
 | `world/UESTC-QingShuiHe/` | Minecraft Java 版存档（1.17+，平地模式，中型树） |
-| `bluemap/` | BlueMap CLI 配置（含 122 处地名标注的 marker-sets） |
+| `bluemap/` | BlueMap CLI 配置（含 123 处地名标注的 marker-sets） |
 | `scripts/gen_markers.py` | 从 OSM 数据批量生成地名标注的脚本 |
 | `assets/` | 预览图 |
 
