@@ -1,0 +1,4 @@
+web/
+*.log
+*.err
+.DS_Store
