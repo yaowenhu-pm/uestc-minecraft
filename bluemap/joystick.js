@@ -5,12 +5,18 @@
 (function () {
   'use strict';
 
-  var WALK_DISTANCE = 42;    // 第三人称镜头距离
+  // 默认出生点：学生活动中心。BlueMap 无锚点时落在世界原点(0,0)，
+  // 加载完成后若仍在原点附近就搬到学活。
+  var SPAWN = { x: 848, z: 505, distance: 120, angle: 0.9 };
+
+  var WALK_DISTANCE = 26;    // 第三人称镜头距离
   var WALK_ANGLE = 1.18;     // 镜头俯仰（接近平视）
   var SPEED = 26;            // 移动速度 方块/秒
   var TURN = 2.4;            // 转向速度 弧度/秒
   var FLY_SPEED = 18;        // 垂直速度 方块/秒
   var EYE = 2;               // 目标点离地高度
+  var JUMP_V = 10;           // 起跳初速 方块/秒
+  var GRAVITY = 26;          // 重力加速度
 
   function ready(fn) {
     if (window.bluemap && window.bluemap.mapViewer &&
@@ -21,6 +27,13 @@
   ready(function () {
     var bm = window.bluemap;
     var cm = bm.mapViewer.controlsManager;
+
+    setTimeout(function () {
+      if (Math.hypot(cm.position.x, cm.position.z) < 5) {
+        cm.position.x = SPAWN.x; cm.position.z = SPAWN.z;
+        cm.distance = SPAWN.distance; cm.angle = SPAWN.angle;
+      }
+    }, 1000);
 
     /* ---------- 像素小人（背影） ---------- */
     var av = document.createElement('canvas');
@@ -49,9 +62,9 @@
     avatar.style.cssText = 'position:fixed;left:50%;top:50%;pointer-events:none;' +
       'z-index:900;display:none;transform:translate(-50%,-58%);';
     var shadow = document.createElement('div');
-    shadow.style.cssText = 'width:52px;height:14px;border-radius:50%;' +
+    shadow.style.cssText = 'width:26px;height:8px;border-radius:50%;' +
       'background:rgba(0,0,0,0.3);margin:-6px auto 0;';
-    av.style.cssText = 'width:64px;height:128px;image-rendering:pixelated;display:block;margin:0 auto;';
+    av.style.cssText = 'width:34px;height:68px;image-rendering:pixelated;display:block;margin:0 auto;';
     avatar.appendChild(av); avatar.appendChild(shadow);
     document.body.appendChild(avatar);
 
@@ -123,7 +136,13 @@
     toggle.textContent = '小人模式';
     document.body.appendChild(toggle);
 
-    var on = false, flying = false, playerY = 0;
+    var on = false, flying = false, playerY = 0, vy = 0, jumping = false;
+    window.addEventListener('keydown', function (e) {
+      if (!on) return;
+      if (e.code === 'Space' && !flying && !jumping) {
+        vy = JUMP_V; jumping = true; e.preventDefault();
+      }
+    });
     toggle.addEventListener('click', function () {
       on = !on;
       toggle.textContent = on ? '退出小人' : '小人模式';
@@ -167,13 +186,18 @@
         // 升降与贴地。BlueMap 默认控件每帧会把 y 拉向地形，
         // 所以我们自己维护 playerY，并在每帧末尾强制写入，后写者生效。
         var gy = groundY();
-        if (vert !== 0) {
+        if (jumping && vert === 0) {
+          playerY += vy * dt; vy -= GRAVITY * dt;
+          if (gy !== null && playerY <= gy + EYE && vy < 0) {
+            playerY = gy + EYE; vy = 0; jumping = false;   // 落地
+          }
+        } else if (vert !== 0) {
           playerY += vert * FLY_SPEED * dt;
-          flying = true;
+          flying = true; jumping = false; vy = 0;
           if (gy !== null && playerY <= gy + EYE) {
             playerY = gy + EYE; flying = false;   // 降到地面即落地
           }
-        } else if (!flying && gy !== null) {
+        } else if (!flying && !jumping && gy !== null) {
           playerY = gy + EYE;                      // 走路时贴地
         }
         cm.position.y = playerY;
